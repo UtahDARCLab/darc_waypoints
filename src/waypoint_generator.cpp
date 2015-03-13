@@ -56,12 +56,13 @@ int main(int argc, char** argv)
    
 void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
 {
-    geometry_msgs::Vector3 left, right, front, back, top, bottom;
+    geometry_msgs::Vector3 left, right, front, back, top, bottom, middle;
 
     double del = 0.7;
     double xCen,yCen,zCen;
-    xCen = 1.25; yCen = -1.2; zCen = 1.25;
+    xCen = 1.21; yCen = -1.3; zCen = 1.2;
 
+    middle.x = xCen;       middle.y = yCen;       middle.z = zCen;
     left.x   = xCen;       left.y   = yCen+del;   left.z   = zCen;
     right.x  = xCen;       right.y  = yCen - del; right.z  = zCen;
     front.x  = xCen + del; front.y  = yCen;       front.z  = zCen;
@@ -72,9 +73,10 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     /*posList.push_back(left);
     posList.push_back(front);
     posList.push_back(right);
-    posList.push_back(back);*/
+    posList.push_back(back);
     posList.push_back(top);
-    posList.push_back(bottom);
+    posList.push_back(bottom);*/
+    posList.push_back(middle);
     
 }
 
