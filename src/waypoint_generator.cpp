@@ -64,7 +64,8 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     double del = 0.7;
     double xCen,yCen,zCen;
     //xCen = 1.21; yCen = -1.3; zCen = 1.2;
-    xCen = 0.0; yCen = 0.0; zCen = 0.3;
+    //xCen = 0.0; yCen = 0.0; zCen = 0.3; // Andy crazy flie stuff
+    xCen = 0.5; yCen = -1.0; zCen = 0.5;
     middle.x = xCen;       middle.y = yCen;       middle.z = zCen;
     left.x   = xCen;       left.y   = yCen+del;   left.z   = zCen;
     right.x  = xCen;       right.y  = yCen - del; right.z  = zCen;
