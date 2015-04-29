@@ -30,6 +30,7 @@ int main(int argc, char** argv)
     des_pos_pub = node.advertise<geometry_msgs::Vector3>("desired_position",1);
     
     std::vector<geometry_msgs::Vector3> desired_positions;
+    
     fillPositionList(desired_positions);
     double bound = 0.2;
     des_pos_out = desired_positions[0];
@@ -37,6 +38,7 @@ int main(int argc, char** argv)
     int arg = 0;
     while(ros::ok())
     {
+    
         if(normSquared(des_pos_out,curr_pos)<bound*bound)
         {
             if(arg < max)
@@ -44,10 +46,11 @@ int main(int argc, char** argv)
             else
                 arg = 0;
             des_pos_out = desired_positions [arg];
-            ROS_INFO("arg: %d",arg);
+            //ROS_INFO("arg: %d",arg);
             //ROS_INFO("Des Pos: %f, %f, %f",des_pos_out.x,des_pos_out.y,des_pos_out.z);
         }
-
+       
+        
         des_pos_pub.publish(des_pos_out);
         ros::spinOnce();
         loop_rate.sleep();
@@ -60,8 +63,8 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
 
     double del = 0.7;
     double xCen,yCen,zCen;
-    xCen = 1.21; yCen = -1.3; zCen = 1.2;
-
+    //xCen = 1.21; yCen = -1.3; zCen = 1.2;
+    xCen = 0.0; yCen = 0.0; zCen = 0.3;
     middle.x = xCen;       middle.y = yCen;       middle.z = zCen;
     left.x   = xCen;       left.y   = yCen+del;   left.z   = zCen;
     right.x  = xCen;       right.y  = yCen - del; right.z  = zCen;
