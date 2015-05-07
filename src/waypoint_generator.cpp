@@ -69,9 +69,9 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     double del = 0.25;
     double xCen,yCen,zCen;
     //xCen = 1.21; yCen = -1.3; zCen = 1.2;
-    xCen = 0.0; yCen = 0.0; zCen = 0.3; // Andy crazy flie stuff
     //xCen = 0.0; yCen = 0.0; zCen = 0.0; // Andy crazy flie stuff
-    //xCen = 0.5; yCen = -1.1; zCen = 0.3;
+    //xCen = 0.0; yCen = 0.0; zCen = 0.3; // Andy crazy flie stuff
+    xCen = 0.5; yCen = -1.1; zCen = 0.3;
     middle.x = xCen;       middle.y = yCen;       middle.z = zCen;
     left.x   = xCen;       left.y   = yCen+del;   left.z   = zCen;
     right.x  = xCen;       right.y  = yCen - del; right.z  = zCen;
@@ -86,9 +86,9 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     /*posList.push_back(back);
     posList.push_back(top);
     posList.push_back(bottom);*/
-    posList.push_back(middle);
+    //posList.push_back(middle);
     
-    /*top_left.x  = xCen + del;     top_left.y = yCen + 1.0*del;     top_left.z = zCen;
+    top_left.x  = xCen + del;     top_left.y = yCen + 1.0*del;     top_left.z = zCen;
     top_right.x = xCen + del;    top_right.y = yCen - 1.0*del;    top_right.z = zCen;
     bot_left.x  = xCen - del;     bot_left.y = yCen + 1.0*del;     bot_left.z = zCen;
     bot_right.x = xCen - del;    bot_right.y = yCen - 1.0*del;    bot_right.z = zCen;
@@ -98,7 +98,7 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     posList.push_back(top_right);
     posList.push_back(bot_right);
     
-    //posList.push_back(bot_left);
+    /*//posList.push_back(bot_left);
     top_left.x = xCen + del;     top_left.y = yCen + del;      top_left.z = zCen + 0.5*del;
     top_right.x = xCen + del;    top_right.y = yCen - del;    top_right.z = zCen + 0.5*del;
     bot_left.x = xCen - del;     bot_left.y = yCen + del;      bot_left.z = zCen + 0.5*del;
