@@ -16,6 +16,7 @@ std::string robotName;
 int joy_a, joy_b, joy_x, joy_y;
 
 int startWaypoints;
+int landing;
 int startControl;
 int shape; 
 
@@ -31,9 +32,10 @@ void pos_callback(const geometry_msgs::Vector3& pos_msg_in)
 void joy_callback(const sensor_msgs::Joy& joy_in)
 {
     joy_a = joy_in.buttons[0]; // A gets flying and starts position hold
-    joy_b = joy_in.buttons[1]; // B lands
+    joy_b = joy_in.buttons[1]; // B lands and turns off
     joy_x = joy_in.buttons[2]; // X starts waypoints
     joy_y = joy_in.buttons[3]; // Y stops waypoints and holds
+    
     if( (joy_a && !startControl) || (joy_b && startControl) )
     {
         startControl = !startControl;
@@ -122,20 +124,22 @@ int main(int argc, char** argv)
                         arg = 0;
                     des_pos_out = desired_positions [arg];
                 }
-                des_pos_pub.publish(des_pos_out);
-                ros::spinOnce();
-                loop_rate.sleep();
             }
             else // time based loop
             {
-                if(arg < max)
-                    arg++;
-                else
-                    arg = 0;
-                des_pos_pub.publish(desired_positions[arg]);
-                ros::spinOnce();
-                ros::Duration(timestep).sleep();
+                count++;
+                if( (double)count/100.0 > timestep )
+                {
+                    count = 0;
+                    if(arg < max)
+                        arg++;
+                    else
+                        arg = 0;
+                }
             }
+            des_pos_pub.publish(desired_positions[arg]);
+            ros::spinOnce();
+            loop_rate.sleep();
         }
         else
         {
@@ -148,12 +152,12 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
 {
     geometry_msgs::Vector3 left, right, front, back, top, bottom, middle;
     geometry_msgs::Vector3 top_left, top_right, bot_left, bot_right;
-    double del = 0.1;
+    double del = 0.3;
     double xCen,yCen,zCen;
     //xCen = 1.21; yCen = -1.3; zCen = 1.2;
     //xCen = 0.0; yCen = 0.0; zCen = 0.0; // Andy crazy flie stuff
     //xCen = 0.0; yCen = 0.0; zCen = 0.3; // Andy crazy flie stuff
-    xCen = 0.5; yCen = -1.1; zCen = 0.3;
+    xCen = 0.5; yCen = -1.1; zCen = 0.5;
     middle.x = xCen;       middle.y = yCen;       middle.z = zCen;
     left.x   = xCen;       left.y   = yCen+del;   left.z   = zCen;
     right.x  = xCen;       right.y  = yCen - del; right.z  = zCen;
