@@ -152,12 +152,12 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
 {
     geometry_msgs::Vector3 left, right, front, back, top, bottom, middle;
     geometry_msgs::Vector3 top_left, top_right, bot_left, bot_right;
-    double del = 0.3;
+    double del = 0.4;
     double xCen,yCen,zCen;
     //xCen = 1.21; yCen = -1.3; zCen = 1.2;
     //xCen = 0.0; yCen = 0.0; zCen = 0.0; // Andy crazy flie stuff
     //xCen = 0.0; yCen = 0.0; zCen = 0.3; // Andy crazy flie stuff
-    xCen = 0.5; yCen = -1.1; zCen = 0.5;
+    xCen = 0.5; yCen = -1.1; zCen = 0.6; 
     middle.x = xCen;       middle.y = yCen;       middle.z = zCen;
     left.x   = xCen;       left.y   = yCen+del;   left.z   = zCen;
     right.x  = xCen;       right.y  = yCen - del; right.z  = zCen;
@@ -178,6 +178,13 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     trileft.x = xCen - 0.5*del; trileft.y = yCen + 0.866*del; trileft.z = zCen;
     triright.x = xCen - 0.5*del; triright.y = yCen - 0.866*del; triright.z = zCen;
     
+    // ground effects testing terms
+    geometry_msgs::Vector3 ground;
+    float height = 1.250;
+    int numSteps = 20;
+    
+    //ground.x = 0.0; ground.y = 0.0; ground.z = height;
+    
     if ( robotName == "quad1" )
     {
         if ( shape == 1 ) // square
@@ -192,6 +199,18 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
             posList.push_back(tritop);
             posList.push_back(trileft);
             posList.push_back(triright);
+        }
+        
+        else if (shape == 3) // ground effects test
+        {
+            ground.x = 0.0; ground.y = 0.0; ground.z = height;
+            for(int n = 0; n < numSteps; n++)
+            {   
+            
+                ground.z -= height/double(numSteps + 1);
+                posList.push_back(ground);
+            }
+        
         }
     }
     else if ( robotName == "quad2" )
@@ -209,6 +228,17 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
             posList.push_back(triright);
             posList.push_back(tritop);
         }
+        else if (shape == 3) // ground effects test
+        {
+            ground.x = 0.0; ground.y = 0.0; ground.z = height;
+            for(int n = 0; n < numSteps; n++)
+            {   
+            
+                ground.z -= height/double(numSteps + 1);
+                posList.push_back(ground);
+            }
+        
+        }
     }
     else if ( robotName == "quad3" )
     {
@@ -224,6 +254,17 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
             posList.push_back(triright);
             posList.push_back(tritop);
             posList.push_back(trileft);
+        }
+        else if (shape == 3) // ground effects test
+        {
+            ground.x = 0.0; ground.y = 0.0; ground.z = height;
+            for(int n = 0; n < numSteps; n++)
+            {   
+            
+                ground.z -= height/double(numSteps + 1);
+                posList.push_back(ground);
+            }
+        
         }
     }
     
