@@ -180,7 +180,7 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     
     // ground effects testing terms
     geometry_msgs::Vector3 ground;
-    float height = 1.250;
+    float height = 0.05;
     int numSteps = 20;
     
     //ground.x = 0.0; ground.y = 0.0; ground.z = height;
