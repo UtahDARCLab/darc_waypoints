@@ -180,7 +180,7 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     
     // ground effects testing terms
     geometry_msgs::Vector3 ground;
-    float height = 0.05;
+    float height = 1.0;//1.25;
     int numSteps = 20;
     
     //ground.x = 0.0; ground.y = 0.0; ground.z = height;
@@ -205,10 +205,9 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
         {
             ground.x = 0.0; ground.y = 0.0; ground.z = height;
             for(int n = 0; n < numSteps; n++)
-            {   
-            
-                ground.z -= height/double(numSteps + 1);
+            {       
                 posList.push_back(ground);
+                ground.z -= height/double(numSteps + 1);
             }
         
         }
@@ -232,10 +231,9 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
         {
             ground.x = 0.0; ground.y = 0.0; ground.z = height;
             for(int n = 0; n < numSteps; n++)
-            {   
-            
-                ground.z -= height/double(numSteps + 1);
+            {       
                 posList.push_back(ground);
+                ground.z -= height/double(numSteps + 1);
             }
         
         }
@@ -259,10 +257,9 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
         {
             ground.x = 0.0; ground.y = 0.0; ground.z = height;
             for(int n = 0; n < numSteps; n++)
-            {   
-            
-                ground.z -= height/double(numSteps + 1);
+            {       
                 posList.push_back(ground);
+                ground.z -= height/double(numSteps + 1);
             }
         
         }
