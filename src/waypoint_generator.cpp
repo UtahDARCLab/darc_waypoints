@@ -177,13 +177,14 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     tritop.x = xCen + del; tritop.y = yCen; tritop.z = zCen;
     trileft.x = xCen - 0.5*del; trileft.y = yCen + 0.866*del; trileft.z = zCen;
     triright.x = xCen - 0.5*del; triright.y = yCen - 0.866*del; triright.z = zCen;
+        
     
     // ground effects testing terms
     geometry_msgs::Vector3 ground;
-    float height = 1.0;//1.25;
-    int numSteps = 20;
-    
-    //ground.x = 0.0; ground.y = 0.0; ground.z = height;
+    float height = 0.75;//1.25;
+    int numSteps = 5;
+    float yList[] = {-1.5, -1.0, -0.75, -0.65, -0.60};
+    //ground.x = 1.0; ground.y = -1.25; ground.z = height;
     
     if ( robotName == "quad1" )
     {
@@ -201,13 +202,14 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
             posList.push_back(triright);
         }
         
-        else if (shape == 3) // ground effects test
+        else if (shape == 3) //  proximity effects testing
         {
-            ground.x = 0.0; ground.y = 0.0; ground.z = height;
-            for(int n = 0; n < numSteps; n++)
-            {       
+            ground.x = 1.0; ground.y = -0.5; ground.z = height;
+            //for(int n = 0; n < numSteps; n++)
+            {               
+                //ground.y = yList[n];    
                 posList.push_back(ground);
-                ground.z -= height/double(numSteps + 1);
+                //ground.z -= height/double(numSteps + 1);
             }
         
         }
@@ -227,13 +229,14 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
             posList.push_back(triright);
             posList.push_back(tritop);
         }
-        else if (shape == 3) // ground effects test
+        else if (shape == 3) // proximity effects testing
         {
-            ground.x = 0.0; ground.y = 0.0; ground.z = height;
+            ground.x = 1.0; ground.y = -0.5; ground.z = height;
             for(int n = 0; n < numSteps; n++)
-            {       
+            {
+                ground.y = yList[n];       
                 posList.push_back(ground);
-                ground.z -= height/double(numSteps + 1);
+                //ground.z -= height/double(numSteps + 1);
             }
         
         }
@@ -253,13 +256,13 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
             posList.push_back(tritop);
             posList.push_back(trileft);
         }
-        else if (shape == 3) // ground effects test
+        else if (shape == 3) //  proximity effects testing
         {
-            ground.x = 0.0; ground.y = 0.0; ground.z = height;
+            //ground.x = 0.0; ground.y = 0.0; ground.z = height;
             for(int n = 0; n < numSteps; n++)
             {       
                 posList.push_back(ground);
-                ground.z -= height/double(numSteps + 1);
+                //ground.z -= height/double(numSteps + 1);
             }
         
         }
