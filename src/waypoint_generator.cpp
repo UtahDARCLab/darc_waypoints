@@ -6,6 +6,8 @@
 #include <std_msgs/Int16.h>
 #include <sensor_msgs/Joy.h>
 #include <string>
+#include <math.h>
+
 
 geometry_msgs::Vector3 curr_pos, des_pos_out;
 
@@ -181,11 +183,13 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     
     // ground effects testing terms
     geometry_msgs::Vector3 ground;
-    float height = 0.75;//1.25;
-    int numSteps = 5;
-    float yList[] = {-1.5, -1.0, -0.75, -0.65, -0.60};
-    //ground.x = 1.0; ground.y = -1.25; ground.z = height;
-    
+    double height = 0.75;//1.25;
+    int numSteps = 20;
+    double yList[] = {-1.5, -1.0, -0.75, -0.65, -0.60};
+    ground.x = 1.0; ground.y = -1.25; ground.z = height;
+	double radius = 0.5; //radius of the circle trajectory in meters
+	xCen = 0.75;
+ 	yCen = -1.0;
     if ( robotName == "quad1" )
     {
         if ( shape == 1 ) // square
@@ -213,6 +217,18 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
             }
         
         }
+		else if (shape == 4) // circle
+		{
+			ground.z = height;
+			
+			for(int n = 0; n < numSteps - 1; n++)
+			{
+				ground.x = xCen + radius*cos((double)n*2.0*M_PI/((double)numSteps));
+				ground.y = yCen + radius*sin((double)n*2.0*M_PI/((double)numSteps));
+				posList.push_back(ground);
+			}
+		}
+			
     }
     else if ( robotName == "quad2" )
     {
@@ -232,12 +248,13 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
         else if (shape == 3) // proximity effects testing
         {
             ground.x = 1.0; ground.y = -0.5; ground.z = height;
+			/*
             for(int n = 0; n < numSteps; n++)
             {
                 ground.y = yList[n];       
                 posList.push_back(ground);
                 //ground.z -= height/double(numSteps + 1);
-            }
+            }*/
         
         }
     }
