@@ -184,7 +184,7 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
     // ground effects testing terms
     geometry_msgs::Vector3 ground;
     double height = 0.75;//1.25;
-    int numSteps = 20;
+    int numSteps = 25;
     double yList[] = {-1.5, -1.0, -0.75, -0.65, -0.60};
     ground.x = 1.0; ground.y = -1.25; ground.z = height;
 	double radius = 0.5; //radius of the circle trajectory in meters
@@ -221,7 +221,7 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
 		{
 			ground.z = height;
 			
-			for(int n = 0; n < numSteps - 1; n++)
+			for(int n = 0; n < numSteps; n++)
 			{
 				ground.x = xCen + radius*cos((double)n*2.0*M_PI/((double)numSteps));
 				ground.y = yCen + radius*sin((double)n*2.0*M_PI/((double)numSteps));
