@@ -22,7 +22,7 @@ int joy_a, joy_b, joy_x, joy_y;
 int startWaypoints;
 int landing;
 int startControl;
-
+int startItr = 0;
 
 // Read mocap position
 void pos_callback(const geometry_msgs::Vector3& pos_msg_in)
@@ -47,6 +47,8 @@ void joy_callback(const sensor_msgs::Joy& joy_in)
     else if( (joy_x && !startWaypoints) || (joy_y && startWaypoints) )
     {
         startWaypoints = !startWaypoints;
+        startItr = !startItr;
+        ROS_INFO("Start itr = %d",startItr);
     }
 }
 
@@ -64,8 +66,25 @@ int main(int argc, char** argv)
     pos_sub = node.subscribe("current_position",1,pos_callback);
     joy_sub = node.subscribe("joy",1,joy_callback);
 
+    
+
     ros::Publisher des_pos_pub;
     des_pos_pub = node.advertise<geometry_msgs::Vector3>("desired_position",1);
+
+    ros::Publisher ilc_des_pos;
+    ilc_des_pos = node.advertise<geometry_msgs::Vector3>("ilc_des_pos",1);
+    
+    ros::Publisher ilc_err_out;
+    ilc_err_out = node.advertise<geometry_msgs::Vector3>("ilc_error",1);
+	
+    ros::Publisher ilc_pos_out;
+    ilc_pos_out = node.advertise<geometry_msgs::Vector3>("ilc_pos",1);
+    
+    ros::Publisher ilc_itr_out;
+    ilc_itr_out = node.advertise<std_msgs::Int16>("ilc_itr",1);
+
+    ros::Publisher ilc_itr_start;
+    ilc_itr_start = node.advertise<std_msgs::Int16>("ilc_itr_start",1);
 
 
 
@@ -186,9 +205,18 @@ int main(int argc, char** argv)
         			errArray[numCounts].x = desired_positions[arg].x - curr_pos.x;
         			errArray[numCounts].y = desired_positions[arg].y - curr_pos.y;
         		}
-        		//publish the position
+                tempError.x = desired_positions[arg].x - curr_pos.x;
+                tempError.y = desired_positions[arg].y - curr_pos.y;
+                tempError.z = desired_positions[arg].z - curr_pos.z;
 
+
+        		//publish the position
+                ilc_pos_out.publish(curr_pos);
+                ilc_des_pos.publish(desired_positions[arg]);
+                ilc_err_out.publish(tempError);
         		des_pos_pub.publish(des_pos_out);
+                ilc_itr_out.publish(iterCount);
+                ilc_itr_start.publish(startItr);
         		ros::spinOnce();
         		loop_rate.sleep();
         		numCounts++;
@@ -210,7 +238,7 @@ void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
 	double height = 0.75;
 	double radius = 0.5;
 	int numSteps = 50;
-
+    
 	ground.z = height;
 	for (int n = 0; n < numSteps; n++)
 	{
