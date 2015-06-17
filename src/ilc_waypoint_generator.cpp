@@ -9,20 +9,20 @@ A large portion of this was takend directly from waypoint_generator.cpp*/
 #include <sensor_msgs/Joy.h>
 #include <string>
 #include <math.h>
-
+#include <iostream>
 
 geometry_msgs::Vector3 curr_pos, des_pos_out;
 std::vector<geometry_msgs::Vector3> prevU, prevPos;
 double timestep;
 int timedLoop;
 double rho;
-
+bool deBug;
 int joy_a, joy_b, joy_x, joy_y;
 
 int startWaypoints;
 int landing;
 int startControl;
-int startItr = 0;
+//int startItr = 0;
 
 // Read mocap position
 void pos_callback(const geometry_msgs::Vector3& pos_msg_in)
@@ -47,8 +47,8 @@ void joy_callback(const sensor_msgs::Joy& joy_in)
     else if( (joy_x && !startWaypoints) || (joy_y && startWaypoints) )
     {
         startWaypoints = !startWaypoints;
-        startItr = !startItr;
-        ROS_INFO("Start itr = %d",startItr);
+        //startItr = !startItr;
+        //ROS_INFO("Start itr = %d",startItr);
     }
 }
 
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 {
 	ros::init(argc,argv,"ilc_waypoint_generator");
 	ros::NodeHandle node;
-	ros::Rate loop_rate(50);
+	ros::Rate loop_rate(100);
     
     ros::Subscriber pos_sub, joy_sub;
     pos_sub = node.subscribe("current_position",1,pos_callback);
@@ -82,10 +82,12 @@ int main(int argc, char** argv)
     
     ros::Publisher ilc_itr_out;
     ilc_itr_out = node.advertise<std_msgs::Int16>("ilc_itr",1);
-
+    /*
     ros::Publisher ilc_itr_start;
     ilc_itr_start = node.advertise<std_msgs::Int16>("ilc_itr_start",1);
-
+    */
+    ros::Publisher ilc_rho;
+    ilc_rho = node.advertise<std_msgs::Float32>("ilc_rho",1);
 
 
         if ( node.getParam("timed_loop",timedLoop) ) {;}
@@ -100,16 +102,18 @@ int main(int argc, char** argv)
         ROS_ERROR("What is the timing between waypoints?");
         return 0;
     }
-    /*
     if (node.getParam("rho",rho)){;}
     else
     {
-    	ROS_ERROR("Missing learning parameter");
+    	ROS_ERROR("Missing iterative learning parameter");
     	return 0;
     }
-  */
-    node.getParam("rho",rho);
-
+    if (node.getParam("deBug",deBug)){;}
+    else
+    {   
+        ROS_ERROR("Did not assing debug value, deBug set to false");
+        deBug = false;
+    }
     //currently only running in a circle. Will bring back if needed
     /*
     if ( node.getParam("robot_name",robotName) ) {;}
@@ -138,7 +142,7 @@ int main(int argc, char** argv)
     int iterCount = 0;
     int numCounts = 0;
     int countBound = 10;
-
+    int firstTime = 0;
     startWaypoints = 0;
 
     while(ros::ok())
@@ -149,6 +153,10 @@ int main(int argc, char** argv)
     	if (startControl && !startWaypoints)
         {
         	des_pos_pub.publish(desired_positions[arg]);
+            //if(deBug)
+            //{
+                ROS_INFO("desPos = [%.3f, %.3f], curPos = [%.3f, %.3f]",desired_positions[arg].x, desired_positions[arg].y, curr_pos.x, curr_pos.y);
+            //}
         }
         //hovering and start waypoints
         else if(startControl && startWaypoints)
@@ -160,17 +168,26 @@ int main(int argc, char** argv)
         		{
         			count = 0;
         			if(arg < max)
-        				arg++;
+                    {
+        				if(firstTime != 0){
+                            arg++;
+                        }
+                    }
         			else
-        			{
-        				aveError.x = 0.0; aveError.y=0.0; aveError.z = 0.0;
+        			{   
+                        aveError.x = 0.0; aveError.y=0.0; aveError.z = 0.0;
         				findAverageError(errArray, aveError,numCounts);
         				double normError = sqrt(aveError.x*aveError.x + aveError.y*aveError.y);
+                        std::cout << "\n" << std::endl;
         				ROS_INFO("Iteration %d average error(m) = %.6f\trho = %.2f", iterCount,normError,rho);
-        				arg = 0;
+                        
+                        ROS_INFO("desPos = [%.3f, %.3f], curPos = [%.3f, %.3f]\n", desired_positions[arg].x, desired_positions[arg].y,curr_pos.x, curr_pos.y);
+
+                        arg = 0;
         				numCounts = 0;
-        				//if(iterCount)
-        					iterCount++;      
+    					iterCount++;
+
+                        firstTime = 0;
         			}
         		}
         		// for the first iteration we need U1 = xd + rho*(xd-x)
@@ -181,18 +198,18 @@ int main(int argc, char** argv)
         			prevU.push_back(des_pos_out);
         			prevPos.push_back(curr_pos);
 
-
         			tempError.x = desired_positions[arg].x - curr_pos.x;
         			tempError.y = desired_positions[arg].y - curr_pos.y;
         			errArray.push_back(tempError);
-
+                    /*
         			if(numCounts == 0)
         			{	
         				prevPos.push_back(curr_pos);
         				prevU.push_back(des_pos_out);
         				errArray.push_back(tempError);
         				numCounts++;
-        			}      			//des_pos_out = desired_positions[arg] + rho*(desired_positions[arg] + curr_pos);
+        			} 
+                    */     			//des_pos_out = desired_positions[arg] + rho*(desired_positions[arg] + curr_pos);
         		}
 
         		//for every other loop we do U_k+1 = U_k(t) + rho*(xd-x)
@@ -204,22 +221,32 @@ int main(int argc, char** argv)
         			prevU[numCounts] = des_pos_out;
         			errArray[numCounts].x = desired_positions[arg].x - curr_pos.x;
         			errArray[numCounts].y = desired_positions[arg].y - curr_pos.y;
+                    prevPos[numCounts] = curr_pos;
         		}
                 tempError.x = desired_positions[arg].x - curr_pos.x;
                 tempError.y = desired_positions[arg].y - curr_pos.y;
                 tempError.z = desired_positions[arg].z - curr_pos.z;
 
-
         		//publish the position
+                if(deBug)
+                {
+                    ROS_INFO("desPos = [%.3f, %.3f], curPos = [%.3f, %.3f]",desired_positions[arg].x, desired_positions[arg].y, curr_pos.x, curr_pos.y);
+                }
+
                 ilc_pos_out.publish(curr_pos);
                 ilc_des_pos.publish(desired_positions[arg]);
                 ilc_err_out.publish(tempError);
         		des_pos_pub.publish(des_pos_out);
                 ilc_itr_out.publish(iterCount);
-                ilc_itr_start.publish(startItr);
+                //ilc_itr_start.publish(startItr);
+                ilc_rho.publish(rho);
+                numCounts++;
+                if (firstTime == 0)
+                    firstTime = 1;
+
         		ros::spinOnce();
         		loop_rate.sleep();
-        		numCounts++;
+
         	}
         }
         else
@@ -253,10 +280,10 @@ void findAverageError(std::vector<geometry_msgs::Vector3>& errList, geometry_msg
 
 	for(int n = 0; n < count; n++)
 	{
-		aveErr.x += errList[n].x;
-		aveErr.y += errList[n].y;
+		aveErr.x += fabs(errList[n].x);
+		aveErr.y += fabs(errList[n].y);
 
 	}
-	aveErr.x = fabs(aveErr.x/((double)count));
-	aveErr.y = fabs(aveErr.y/((double)count));
+	aveErr.x = aveErr.x/((double)count);
+	aveErr.y = aveErr.y/((double)count);
 }
