@@ -2,6 +2,7 @@
 used with the crazyflie
 A large portion of this was takend directly from waypoint_generator.cpp*/
 #include <ros/ros.h>
+
 #include <geometry_msgs/Vector3.h>
 #include <vector>
 #include <std_msgs/Float32.h>
@@ -53,7 +54,7 @@ void joy_callback(const sensor_msgs::Joy& joy_in)
 }
 
 
-void fillPositionList(std::vector<geometry_msgs::Vector3>&);
+void fillPositionList(std::vector<geometry_msgs::Vector3>&, double radius = 0.5);
 void findAverageError(std::vector<geometry_msgs::Vector3>& errList, geometry_msgs::Vector3& aveErr, int count);
 
 int main(int argc, char** argv)
@@ -114,6 +115,7 @@ int main(int argc, char** argv)
         ROS_ERROR("Did not assing debug value, deBug set to false");
         deBug = false;
     }
+
     //currently only running in a circle. Will bring back if needed
     /*
     if ( node.getParam("robot_name",robotName) ) {;}
@@ -129,11 +131,14 @@ int main(int argc, char** argv)
         return 0;
     }
     */
-    std::vector<geometry_msgs::Vector3> desired_positions, errArray;
+    std::vector<geometry_msgs::Vector3> desired_positions, errArray, shrinkPositions;
     geometry_msgs::Vector3 aveError;
     geometry_msgs::Vector3 tempError;
     aveError.x = 0.0; aveError.y=0.0; aveError.z = 0.0;
+    //radius defults to 0.5 m
     fillPositionList(desired_positions);
+    fillPositionList(shrinkPositions, 0.4);
+
     double bound = 0.1; //0.025;
     des_pos_out = desired_positions[0];
     int max = desired_positions.size()-1;
@@ -144,7 +149,7 @@ int main(int argc, char** argv)
     int countBound = 10;
     int firstTime = 0;
     startWaypoints = 0;
-
+    double shrinkScale = 1.0;
     while(ros::ok())
     {
     	ros::spinOnce();
@@ -152,11 +157,26 @@ int main(int argc, char** argv)
     	//take off but do not start waypoints
     	if (startControl && !startWaypoints)
         {
-        	des_pos_pub.publish(desired_positions[arg]);
+            
+            if (iterCount == 0)
+            {
+                des_pos_pub.publish(shrinkPositions[arg]);
+                ROS_INFO("desPos = [%.3f, %.3f], curPos = [%.3f, %.3f]",shrinkPositions[arg].x, shrinkPositions[arg].y, curr_pos.x, curr_pos.y);
+            }
+        	else
+            {
+                des_pos_pub.publish(desired_positions[arg]);
+                ROS_INFO("desPos = [%.3f, %.3f], curPos = [%.3f, %.3f]",desired_positions[arg].x, desired_positions[arg].y, curr_pos.x, curr_pos.y);
+
+            }
+            
+
             //if(deBug)
             //{
-                ROS_INFO("desPos = [%.3f, %.3f], curPos = [%.3f, %.3f]",desired_positions[arg].x, desired_positions[arg].y, curr_pos.x, curr_pos.y);
+                //ROS_INFO("desPos = [%.3f, %.3f], curPos = [%.3f, %.3f]",desired_positions[arg].x, desired_positions[arg].y, curr_pos.x, curr_pos.y);
             //}
+            //des_pos_pub.publish(desired_positions[arg]);
+            //ROS_INFO("desPos = [%.3f, %.3f], curPos = [%.3f, %.3f]",desired_positions[arg].x, desired_positions[arg].y, curr_pos.x, curr_pos.y);
         }
         //hovering and start waypoints
         else if(startControl && startWaypoints)
@@ -193,14 +213,22 @@ int main(int argc, char** argv)
         		// for the first iteration we need U1 = xd + rho*(xd-x)
         		des_pos_out.z = desired_positions[arg].z;
         		if(!iterCount){
-        			des_pos_out.x = desired_positions[arg].x;
-        			des_pos_out.y = desired_positions[arg].y;
-        			prevU.push_back(des_pos_out);
+        			//des_pos_out.x = desired_positions[arg].x;
+        			//des_pos_out.y = desired_positions[arg].y;
+        			
+                    des_pos_out.x = shrinkPositions[arg].x;
+                    des_pos_out.y = shrinkPositions[arg].y;
+
+                    prevU.push_back(des_pos_out);
         			prevPos.push_back(curr_pos);
 
-        			tempError.x = desired_positions[arg].x - curr_pos.x;
-        			tempError.y = desired_positions[arg].y - curr_pos.y;
-        			errArray.push_back(tempError);
+        			//tempError.x = desired_positions[arg].x - curr_pos.x;
+        			//tempError.y = desired_positions[arg].y - curr_pos.y;
+
+                    tempError.x = shrinkPositions[arg].x - curr_pos.x;
+                    tempError.y = shrinkPositions[arg].y - curr_pos.y;
+        			
+                    errArray.push_back(tempError);
                     /*
         			if(numCounts == 0)
         			{	
@@ -238,6 +266,7 @@ int main(int argc, char** argv)
                 ilc_err_out.publish(tempError);
         		des_pos_pub.publish(des_pos_out);
                 ilc_itr_out.publish(iterCount);
+
                 //ilc_itr_start.publish(startItr);
                 ilc_rho.publish(rho);
                 numCounts++;
@@ -251,19 +280,20 @@ int main(int argc, char** argv)
         }
         else
         {
+            
         	loop_rate.sleep();
         }
     }
     return 0;
 }
 
-
-void fillPositionList(std::vector<geometry_msgs::Vector3>& posList)
+//, double radius = 0.5
+void fillPositionList(std::vector<geometry_msgs::Vector3>& posList, double radius)
 {
 	geometry_msgs::Vector3 ground;
 	double xCen = 0.6,yCen = -0.9; //center of the circle
 	double height = 0.75;
-	double radius = 0.5;
+	//double radius = 0.5;
 	int numSteps = 50;
     
 	ground.z = height;
