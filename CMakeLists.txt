@@ -105,7 +105,6 @@ include_directories(
 ## Declare a cpp executable
 # add_executable(darc_waypoints_node src/darc_waypoints_node.cpp)
 add_executable(waypoint_generator src/waypoint_generator.cpp)
-add_executable(ilc_waypoint_generator src/ilc_waypoint_generator.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -116,7 +115,7 @@ add_executable(ilc_waypoint_generator src/ilc_waypoint_generator.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(waypoint_generator ${catkin_LIBRARIES})
-target_link_libraries(ilc_waypoint_generator ${catkin_LIBRARIES})
+
 
 #############
 ## Install ##
