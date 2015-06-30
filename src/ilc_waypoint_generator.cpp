@@ -1,16 +1,19 @@
 /* this node was created to be the waypoint node for the iterative controller and 
 used with the crazyflie
 A large portion of this was takend directly from waypoint_generator.cpp*/
-#include <ros/ros.h>
 
+#include <ros/ros.h>
 #include <geometry_msgs/Vector3.h>
 #include <vector>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Int16.h>
 #include <sensor_msgs/Joy.h>
-#include <string>
+#include <string>	
 #include <math.h>
-#include <iostream>
+//#include <iostream>
+
+
+
 
 geometry_msgs::Vector3 curr_pos, des_pos_out;
 std::vector<geometry_msgs::Vector3> prevU, prevPos;
@@ -91,7 +94,7 @@ int main(int argc, char** argv)
     ilc_rho = node.advertise<std_msgs::Float32>("ilc_rho",1);
 
 
-        if ( node.getParam("timed_loop",timedLoop) ) {;}
+    if ( node.getParam("timed_loop",timedLoop) ) {;}
     else
     {
         ROS_ERROR("Are waypoints timed or position based?");
@@ -265,10 +268,12 @@ int main(int argc, char** argv)
                 ilc_des_pos.publish(desired_positions[arg]);
                 ilc_err_out.publish(tempError);
         		des_pos_pub.publish(des_pos_out);
-                ilc_itr_out.publish(iterCount);
-
+				std_msgs::Int16 iterCountPub;
+				iterCountPub.data = iterCount; 
+                //ilc_itr_out.publish(iterCount);
+				ilc_itr_out.publish(iterCountPub);
                 //ilc_itr_start.publish(startItr);
-                ilc_rho.publish(rho);
+                //ilc_rho.publish(rho);
                 numCounts++;
                 if (firstTime == 0)
                     firstTime = 1;
